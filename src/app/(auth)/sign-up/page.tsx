@@ -10,11 +10,12 @@ import {
   Label,
   TextField,
 } from "@heroui/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
-    const router = useRouter();
+  const router = useRouter();
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -34,11 +35,11 @@ const SignUpPage = () => {
         duration: 4000,
       });
 
-      router.push('/');
-    }else{
-        toast.error(`Something went wrong. Please try again`);
-        console.log(error);
-        return;
+      router.push("/");
+    } else {
+      toast.error(`Something went wrong. Please try again`);
+      console.log(error);
+      return;
     }
   };
 
@@ -165,13 +166,16 @@ const SignUpPage = () => {
                 Create account
               </Button>
 
-              <Button
-                type="reset"
-                variant="secondary"
-                className="flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-              >
-                Reset
-              </Button>
+              <div>
+                <Link href={`/sign-in`}>
+                  <Button
+                    variant="secondary"
+                    className="flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                  >
+                    I already have an account
+                  </Button>
+                </Link>
+              </div>
             </div>
           </Form>
         </div>

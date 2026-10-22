@@ -1,5 +1,5 @@
 "use client";
-import { signIn, useSession } from "@/lib/auth-client";
+import { signIn} from "@/lib/auth-client";
 import {
   Button,
   Description,
@@ -9,13 +9,11 @@ import {
   Label,
   TextField,
 } from "@heroui/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 const SignInPage = () => {
-  const session = useSession();
   const router = useRouter();
-  const [name, setName] = useState("");
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -35,18 +33,13 @@ const SignInPage = () => {
         duration: 4000,
       });
       router.push("/");
-    }else{
-        toast.error(`Something went wrong. Please try again`);
-        console.log(error);
-        return;
+    } else {
+      toast.error(`Something went wrong. Please try again`);
+      console.log(error);
+      return;
     }
   };
 
-  useEffect(()=>{
-    if(session?.data?.user.name){
-        setName(session.data.user.name);
-    }
-  },[session?.data?.user.name])
   return (
     <main className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-indigo-50 px-4 py-12">
       <div className="w-full max-w-md">
@@ -70,11 +63,11 @@ const SignInPage = () => {
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Create your account
+            Sign In your account
           </h1>
 
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Get started by creating your account today.
+            Get started by sign in your account today.
           </p>
         </div>
 
@@ -82,18 +75,12 @@ const SignInPage = () => {
         <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8">
           <Form className="flex w-full flex-col gap-5" onSubmit={onSubmit}>
             {/* Name */}
-            <TextField
-              name="name"
-              type="text"
-              className="flex flex-col gap-2"
-            >
+            <TextField name="name" type="text" className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-slate-700">
                 Full name
               </Label>
 
               <Input
-                value={name}
-                onChange={(e)=>setName(e.target.value)}
                 placeholder="Enter your name"
                 className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 outline-none transition focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10"
               />
@@ -168,16 +155,17 @@ const SignInPage = () => {
                 type="submit"
                 className="flex h-12 w-full items-center justify-center rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 active:scale-[0.99]"
               >
-                Create account
+                Sign In
               </Button>
 
-              <Button
-                type="reset"
-                variant="secondary"
-                className="flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-              >
-                Reset
-              </Button>
+              <Link href={`/sign-up`}>
+                <Button
+                  variant="secondary"
+                  className="flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                >
+                  Create account
+                </Button>
+              </Link>
             </div>
           </Form>
         </div>
