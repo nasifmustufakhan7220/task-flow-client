@@ -10,10 +10,12 @@ import {
   TextField,
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 const SignInPage = () => {
   const session = useSession();
   const router = useRouter();
+  const [name, setName] = useState("");
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -39,6 +41,12 @@ const SignInPage = () => {
         return;
     }
   };
+
+  useEffect(()=>{
+    if(session?.data?.user.name){
+        setName(session.data.user.name);
+    }
+  },[session?.data?.user.name])
   return (
     <main className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-indigo-50 px-4 py-12">
       <div className="w-full max-w-md">
@@ -75,7 +83,6 @@ const SignInPage = () => {
           <Form className="flex w-full flex-col gap-5" onSubmit={onSubmit}>
             {/* Name */}
             <TextField
-              isRequired
               name="name"
               type="text"
               className="flex flex-col gap-2"
@@ -85,7 +92,9 @@ const SignInPage = () => {
               </Label>
 
               <Input
-                placeholder={session?.data?.user?.name}
+                value={name}
+                onChange={(e)=>setName(e.target.value)}
+                placeholder="Enter your name"
                 className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 outline-none transition focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10"
               />
 

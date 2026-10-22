@@ -34,7 +34,7 @@ const SignUpPage = () => {
         duration: 4000,
       });
 
-      router.push('/sign-in');
+      router.push('/');
     }else{
         toast.error(`Something went wrong. Please try again`);
         console.log(error);
