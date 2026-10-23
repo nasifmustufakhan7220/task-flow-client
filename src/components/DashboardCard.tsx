@@ -1,8 +1,7 @@
 import { ClipboardList, TrendingUp } from "lucide-react";
 import TaskCard from "./TaskCard";
-import CreateTaskButton from "./CreateTaskButton";
 
-const getAllTasks = async () => {
+export const getAllTasks = async () => {
   const res = await fetch("http://localhost:5000/tasks");
   return res.json();
 };
@@ -36,10 +35,7 @@ const DashboardCard = async () => {
   const todo = tasks.filter((task) => task.status === "Pending");
   return (
     <div>
-      <div className="bg-base-100 rounded-box shadow-md mb-6 flex justify-between p-5 items-center">
-        <p className="text-2xl">Dashboard</p>
-        <CreateTaskButton />
-      </div>
+      
       <div className=" flex items-center gap-4">
         <div>
           <div className=" rounded-2xl bg-white p-8 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
