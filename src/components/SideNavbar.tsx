@@ -4,9 +4,6 @@ import { signOut, useSession } from "@/lib/auth-client";
 import {
   LayoutDashboard,
   FolderOpen,
-  Calendar,
-  Bell,
-  Inbox,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,9 +30,6 @@ const PersonIcon = ({ className }: { className?: string }) => (
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tasks", label: "Tasks", icon: FolderOpen },
-  { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/notification", label: "Notification", icon: Bell },
-  { href: "/inbox", label: "Inbox", icon: Inbox },
 ];
 
 const SideNavbar = () => {
@@ -53,10 +47,10 @@ const SideNavbar = () => {
     })
   }
   return (
-    <aside className="w-64 shrink-0 border-r bg-white p-4">
+    <aside className="w-64 shrink-0 border-r bg-white p-4 flex flex-col justify-between">
       <h1 className="mb-8 text-2xl font-semibold">Nexdo</h1>
 
-      <nav className="flex flex-col gap-1">
+      <nav className="flex flex-col gap-1 overflow-y-auto">
         {
           navLinks.map(({href,label, icon:Icon})=>{
             const active = pathname === href || pathname.startsWith(href + "/");
@@ -79,7 +73,7 @@ const SideNavbar = () => {
         }
       </nav>
 
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+      <div className="mt-auto rounded-2xl border border-slate-200 bg-slate-50 p-3">
             <div className="mb-3 flex items-center gap-3">
               <div className="avatar placeholder">
                 <div className="w-10 rounded-full bg-indigo-100 text-indigo-600">
@@ -109,7 +103,7 @@ const SideNavbar = () => {
                 </>
               ) }
             </div>
-          </div>
+      </div>
     </aside>
   );
 };

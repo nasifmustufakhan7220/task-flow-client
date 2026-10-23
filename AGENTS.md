@@ -10,22 +10,23 @@ Small single-package Next.js 16 app (task-flow client): auth UI + MongoDB via be
 
 ## Architecture
 
-- App Router under `src/app/`; path alias `@/*` → `./src/*`.
+- App Router under `src/app/` with two route groups: `(auth)` (sign-in, sign-up — standalone pages under the root layout) and `(app)` (dashboard, tasks, profile — all share `src/app/(app)/layout.tsx`, a flex shell that renders `SideNavbar` beside `<main>`). Path alias `@/*` → `./src/*`.
 - Auth: `src/lib/auth.ts` (better-auth server + `@better-auth/mongo-adapter`, DB name hardcoded to `"user"`). It **throws at import time if `MONGODB_URI` is unset** — a `.env` file is required even for `next build`/dev if anything imports it.
-- Auth client: `src/lib/auth-client.ts` — note it exports `authClient` (configured with hardcoded `baseURL: http://localhost:3000`) but also destructures `signIn, signUp, useSession` from a *second unconfigured* `createAuthClient()`. Pick deliberately; the hardcoded localhost URL breaks in deployed environments.
-- Better-auth catch-all route lives at `src/app/api/auth/[...all]/route.ts`. Auth pages: `src/app/(auth)/sign-in|sign-up`. Placeholder pages `(auth)/dashboard` and `(auth)/profile` exist (currently empty).
-- Route protection: `src/proxy.ts` — **Next 16 renamed `middleware.ts` → `proxy.ts` (middleware is deprecated; export `proxy`, not `middleware`)**. It session-checks `/dashboard` and `/profile` and redirects to `/sign-in`. It imports `auth.ts`, so it needs `MONGODB_URI` at runtime too. Don't "fix" it back to `middleware.ts`.
+- Auth client: `src/lib/auth-client.ts` — exports `authClient` (configured with hardcoded `baseURL: http://localhost:3000`) plus `signIn, signUp, signOut, useSession` destructured from a *second unconfigured* `createAuthClient()`. Components use the latter; pick deliberately — the hardcoded localhost URL breaks in deployed environments.
+- Better-auth catch-all route lives at `src/app/api/auth/[...all]/route.ts`.
+- Route protection: `src/proxy.ts` — **Next 16 renamed `middleware.ts` → `proxy.ts` (middleware is deprecated; export `proxy`, not `middleware`)**. It session-checks and redirects to `/sign-in`. Its matcher covers only `/dashboard` and `/profile` — `/tasks` is currently unprotected. It imports `auth.ts`, so it needs `MONGODB_URI` at runtime too. Don't "fix" it back to `middleware.ts`.
+- The dashboard fetches tasks from a **separate backend** at hardcoded `http://localhost:5000/tasks` (`getAllTasks` in `src/components/DashboardCard.tsx`) — that server is not part of this repo; the dashboard page needs it running to render.
 
 ## UI shell
 
-- `src/components/SideNavbar.tsx` (`"use client"`) wraps `{children}` in the root layout — the DaisyUI drawer markup *requires* that wrapper (`drawer-content` holds page content, `drawer-side` holds the nav). Keep the structure `<SideNavbar>{children}</SideNavbar>` when editing the layout; don't unwrap children.
-- Two component libs coexist: **DaisyUI v5** (`@plugin "daisyui"` in `globals.css`; drawer/nav/buttons in SideNavbar, `data-theme="light"` set on `<html>`) and **HeroUI v3** (`@heroui/styles` import; used by the auth pages). Don't mix them within one component.
-- SideNavbar is intentionally UI-only: nav items are placeholder buttons and auth buttons have empty TODO `onClick`s — wiring routes/`Link`, `useSession`, and `signOut()` is future work, not a bug.
+- `src/components/SideNavbar.tsx` (`"use client"`) is rendered by the `(app)` layout as a flex sibling of `<main>` — it is *not* in the root layout and does not wrap `{children}`. Keep it inside `(app)/layout.tsx`; auth pages intentionally get no nav.
+- Two component libs coexist: **DaisyUI v5** (`@plugin "daisyui"` in `globals.css`; utility classes like `btn`/`avatar`/`base-100` in SideNavbar and dashboard components, `data-theme="light"` set on `<html>`) and **HeroUI v3** (`@heroui/styles` import; form components on the auth pages). Don't mix them within one component.
+- Still placeholders (render empty divs): `(app)/tasks`, `(app)/profile`, and the home page `src/app/page.tsx`. Sign-up redirects to `/` (the empty home page), sign-in to `/dashboard` — that's current behavior, not a bug.
 
 ## Toolchain quirks
 
 - Next 16 with non-default flags in `next.config.ts`: `cacheComponents`, `partialPrefetching`, `experimental.agentFeedback` — consult `node_modules/next/dist/docs/` before assuming App Router defaults from older versions.
-- Tailwind v4 is loaded via a Turbopack rule (`@tailwindcss/turbopack` loader for `*.css`), not PostCSS — CSS setup lives in `next.config.ts` and `src/app/globals.css` (no `tailwind.config`). `globals.css` also imports `@heroui/styles` (HeroUI v3 is the component library used by the auth pages).
+- Tailwind v4 is loaded via a Turbopack rule (`@tailwindcss/turbopack` loader for `*.css`), not PostCSS — CSS setup lives in `next.config.ts` and `src/app/globals.css` (3 lines total; no `tailwind.config`).
 - Layouts/pages use Next 16 generated global types (e.g. `LayoutProps<"/">`) — don't add manual prop types for those.
 
 <!-- BEGIN:nextjs-agent-rules -->
