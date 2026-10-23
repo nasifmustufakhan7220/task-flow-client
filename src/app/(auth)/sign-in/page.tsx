@@ -32,7 +32,7 @@ const SignInPage = () => {
         icon: "😃",
         duration: 4000,
       });
-      router.push("/");
+      router.push("/dashboard");
     } else {
       toast.error(`Something went wrong. Please try again`);
       console.log(error);

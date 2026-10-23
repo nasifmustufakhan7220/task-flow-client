@@ -1,11 +1,15 @@
 "use client";
 
 import { signOut, useSession } from "@/lib/auth-client";
-import { useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import {
+  LayoutDashboard,
+  FolderOpen,
+  Calendar,
+  Bell,
+  Inbox,
+} from "lucide-react";
 import Link from "next/link";
-
-const NAV_PLACEHOLDERS = ["Dashboard", "My Tasks", "Calendar", "Settings"];
+import { usePathname, useRouter } from "next/navigation";
 
 const PersonIcon = ({ className }: { className?: string }) => (
   <svg
@@ -24,28 +28,20 @@ const PersonIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const MenuIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    aria-hidden="true"
-  >
-    <path d="M4 6h16M4 12h16M4 18h16" />
-  </svg>
-);
 
-export default function SideNavbar({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const {data: session } = useSession();
+
+const navLinks = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/tasks", label: "Tasks", icon: FolderOpen },
+  { href: "/calendar", label: "Calendar", icon: Calendar },
+  { href: "/notification", label: "Notification", icon: Bell },
+  { href: "/inbox", label: "Inbox", icon: Inbox },
+];
+
+const SideNavbar = () => {
+  const pathname = usePathname();
+  const {data:session} = useSession();
   const router = useRouter();
-
-  
 
   const handelSignOut = async()=>{
     await signOut({
@@ -56,79 +52,34 @@ export default function SideNavbar({ children }: { children: ReactNode }) {
       }
     })
   }
-
   return (
-    <div className="drawer">
-      <input
-        id="side-navbar-drawer"
-        type="checkbox"
-        className="drawer-toggle"
-        aria-label="Toggle sidebar"
-        checked={open}
-        onChange={(e) => setOpen(e.target.checked)}
-      />
+    <aside className="w-64 shrink-0 border-r bg-white p-4">
+      <h1 className="mb-8 text-2xl font-semibold">Nexdo</h1>
 
-      <div className="drawer-content relative">
-        {!open && (
-          <button
-            type="button"
-            className="btn btn-circle btn-primary fixed left-4 top-4 z-30 shadow-lg"
-            aria-label="Open sidebar"
-            onClick={() => setOpen(true)}
-          >
-            <MenuIcon />
-          </button>
-        )}
-        {children}
-      </div>
+      <nav className="flex flex-col gap-1">
+        {
+          navLinks.map(({href,label, icon:Icon})=>{
+            const active = pathname === href || pathname.startsWith(href + "/");
 
-      <div className="drawer-side z-40">
-        <label
-          htmlFor="side-navbar-drawer"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        />
-
-        <aside className="flex min-h-full w-80 max-w-[85vw] flex-col border-r border-slate-200 bg-base-100 p-4 text-base-content shadow-xl sm:w-96">
-          {/* Header */}
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-200">
-                <PersonIcon className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-base font-bold tracking-tight">Task Flow</p>
-                <p className="text-xs text-slate-500">Stay organized</p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="btn btn-circle btn-ghost btn-sm"
-              aria-label="Close sidebar"
-              onClick={() => setOpen(false)}
+            return(
+              <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${
+                active
+                  ? "bg-neutral-100 font-medium shadow-sm"
+                  : "text-neutral-600 hover:bg-neutral-50"
+              }`}
             >
-              ✕
-            </button>
-          </div>
+              <Icon size={18} />
+              {label}
+            </Link>
+            )
+          })
+        }
+      </nav>
 
-          <div className="divider mt-0 mb-3" />
-
-          {/* Nav — placeholder items only, wire up real routes yourself */}
-          <ul className="menu w-full flex-1 gap-1 p-0">
-            <li className="menu-title mb-1">Menu</li>
-            {NAV_PLACEHOLDERS.map((label) => (
-              <li key={label}>
-                {/* TODO: replace with <Link href="/your-route"> when the route exists */}
-                <button type="button" className="rounded-xl">
-                  {label}
-                </button>
-              </li>
-            ))}
-          </ul>
-
-
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
             <div className="mb-3 flex items-center gap-3">
               <div className="avatar placeholder">
                 <div className="w-10 rounded-full bg-indigo-100 text-indigo-600">
@@ -136,7 +87,6 @@ export default function SideNavbar({ children }: { children: ReactNode }) {
                 </div>
               </div>
               <div className="min-w-0">
-                {/* TODO: show session user name here */}
                 <p className="truncate text-sm font-semibold text-slate-800">
                   {
                     session?.user? <>{session?.user?.name}</> : <>Guest user</>
@@ -147,7 +97,7 @@ export default function SideNavbar({ children }: { children: ReactNode }) {
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              {session?.user ? (
+              {session?.user && (
                 <>
                   <button
                     onClick={()=>handelSignOut()}
@@ -157,28 +107,11 @@ export default function SideNavbar({ children }: { children: ReactNode }) {
                     Sign out
                   </button>
                 </>
-              ) : (
-                <>
-                  <Link href={`/sign-in`} className="btn btn-sm btn-outline">
-                  
-                  <button type="button" >
-                    Sign in
-                  </button>
-                  </Link>
-
-                  <Link href={`/sign-up`} className="btn btn-sm btn-primary">
-                  
-                  <button type="button" >
-                    Sign up
-                  </button>
-                  </Link>
-
-                </>
-              )}
+              ) }
             </div>
           </div>
-        </aside>
-      </div>
-    </div>
+    </aside>
   );
-}
+};
+
+export default SideNavbar;

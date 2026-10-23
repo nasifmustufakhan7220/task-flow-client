@@ -13,7 +13,14 @@ Small single-package Next.js 16 app (task-flow client): auth UI + MongoDB via be
 - App Router under `src/app/`; path alias `@/*` → `./src/*`.
 - Auth: `src/lib/auth.ts` (better-auth server + `@better-auth/mongo-adapter`, DB name hardcoded to `"user"`). It **throws at import time if `MONGODB_URI` is unset** — a `.env` file is required even for `next build`/dev if anything imports it.
 - Auth client: `src/lib/auth-client.ts` — note it exports `authClient` (configured with hardcoded `baseURL: http://localhost:3000`) but also destructures `signIn, signUp, useSession` from a *second unconfigured* `createAuthClient()`. Pick deliberately; the hardcoded localhost URL breaks in deployed environments.
-- Better-auth catch-all route lives at `src/app/api/auth/[...all]/route.ts`. Auth pages: `src/app/(auth)/sign-in|sign-up`.
+- Better-auth catch-all route lives at `src/app/api/auth/[...all]/route.ts`. Auth pages: `src/app/(auth)/sign-in|sign-up`. Placeholder pages `(auth)/dashboard` and `(auth)/profile` exist (currently empty).
+- Route protection: `src/proxy.ts` — **Next 16 renamed `middleware.ts` → `proxy.ts` (middleware is deprecated; export `proxy`, not `middleware`)**. It session-checks `/dashboard` and `/profile` and redirects to `/sign-in`. It imports `auth.ts`, so it needs `MONGODB_URI` at runtime too. Don't "fix" it back to `middleware.ts`.
+
+## UI shell
+
+- `src/components/SideNavbar.tsx` (`"use client"`) wraps `{children}` in the root layout — the DaisyUI drawer markup *requires* that wrapper (`drawer-content` holds page content, `drawer-side` holds the nav). Keep the structure `<SideNavbar>{children}</SideNavbar>` when editing the layout; don't unwrap children.
+- Two component libs coexist: **DaisyUI v5** (`@plugin "daisyui"` in `globals.css`; drawer/nav/buttons in SideNavbar, `data-theme="light"` set on `<html>`) and **HeroUI v3** (`@heroui/styles` import; used by the auth pages). Don't mix them within one component.
+- SideNavbar is intentionally UI-only: nav items are placeholder buttons and auth buttons have empty TODO `onClick`s — wiring routes/`Link`, `useSession`, and `signOut()` is future work, not a bug.
 
 ## Toolchain quirks
 
