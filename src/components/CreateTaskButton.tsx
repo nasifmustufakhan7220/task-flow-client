@@ -2,18 +2,36 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const statusOptions = ["Pending", "On_review", "Completed", "In Progress"];
 const priorityOptions = ["high", "medium", "low"];
 
 const CreateTaskButton = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // UI-only for now — posting the task to http://localhost:5000/tasks is future work.
-    e.currentTarget.reset();
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries()) as Record<
+    string,
+    string
+    >;
     setIsOpen(false);
+    e.currentTarget.reset();
+    const response = await fetch("http://localhost:5000/create-task", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    
+    const res = await response.json();
+    if(res){
+      router.refresh();
+    }
   };
 
   return (
@@ -35,10 +53,21 @@ const CreateTaskButton = () => {
             <label className="flex flex-col gap-1 text-sm font-medium">
               Task name
               <input
-                name="name"
+                name="title"
                 type="text"
                 required
                 placeholder="Enter task name"
+                className="input w-full"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm font-medium">
+              Task description
+              <input
+                name="description"
+                type="text"
+                required
+                placeholder="Enter task description"
                 className="input w-full"
               />
             </label>
@@ -55,7 +84,11 @@ const CreateTaskButton = () => {
 
             <label className="flex flex-col gap-1 text-sm font-medium">
               Task status
-              <select name="status" defaultValue="Pending" className="select w-full">
+              <select
+                name="status"
+                defaultValue="Pending"
+                className="select w-full"
+              >
                 {statusOptions.map((status) => (
                   <option key={status} value={status}>
                     {status}
@@ -66,7 +99,11 @@ const CreateTaskButton = () => {
 
             <label className="flex flex-col gap-1 text-sm font-medium">
               Task priority
-              <select name="priority" defaultValue="medium" className="select w-full">
+              <select
+                name="priority"
+                defaultValue="medium"
+                className="select w-full"
+              >
                 {priorityOptions.map((priority) => (
                   <option key={priority} value={priority}>
                     {priority}
